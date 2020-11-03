@@ -1,0 +1,5 @@
+{
+  "SSIDs": {{["SSIDS"]}},
+  "StartTemplate": {{"outlook start template.oft"}},
+  "EndTemplate": {{"outlook end template.oft"}}
+}
