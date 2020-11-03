@@ -1,3 +1,8 @@
+#Define parameters and configuration
+param($ConfigPath = 'telework-emails.config.json')
+$config = Get-Content -Path $ConfigPath | ConvertFrom-Json
+
+#---------------------- Function Declarations ----------------------
 <#
 .SYNOPSIS
 Logs a message to a file
@@ -13,9 +18,8 @@ Log('Starting execution')
 #>
 function Log {
     param ($log_msg)
-    $log = '.\telework-emails.log'
-    if (!(Test-Path $log)) { Set-Content -Path $log -Value '' }
-    Add-Content -Path $log -Value $log_msg
+    if (!(Test-Path $config.LogPath)) { Set-Content -Path $config.LogPath -Value '' }
+    Add-Content -Path $config.LogPath -Value $log_msg
 }
 <#
 .SYNOPSIS
@@ -39,23 +43,20 @@ function ExitWithMessage {
     Log($exit_msg)
     exit $code
 }
+
 #---------------------- Script starts here ----------------------
-$config = Get-Content -Path '.\telework-emails.config.json' | ConvertFrom-Json
-$t = Get-Date
 Log('----------------------')
 Log(('Start Log at ' + $t))
+Log(('parameters are as follows:\nStartTemplate:\t'+$config.StartTemplate+'\nEndTemplate:\t'+$config.EndTemplate+'\nSSIDs:\t'+$config.SSIDs+'\nDomain:\t'+$config.Domain))
 # Determine which template to use, by hour of the day
-Log(('parameters are as follows:\nStartTemplate:\t'+$config.StartTemplate+'\nEndTemplate:\t'+$config.EndTemplate+'\nSSID:\t'+$config.SSID))
-# if($null -eq $StartTemplate -or $null -eq $EndTemplate -or $null -eq $SSIDs) {
-#     ExitWithMessage('Insufficient parameters', 1)
-# }
+$t = Get-Date
 if (($t - (Get-Date 08:00)) -lt ((Get-Date 17:00) - $t)) {
     $template = $config.StartTemplate
 } else {
     $template = $config.EndTemplate
 }
 Log(('Template file: ' + $template))
-#get SSID for wifi
+#get SSIDs for wifi
 $a = netsh wlan show interfaces | Select-String '\sSSID\s+:\s(.*)'
 # Find matches
 if ($a.Matches.Count -eq 0) { ExitWithMessage('No Matches', 1) }
@@ -73,7 +74,7 @@ Log(('Adapter: ' + $c))
 Log(('Domain: ' + $env:USERDOMAIN))
 
 # Check to see if working from home
-if (($g -notin $config.SSIDs) -or $env:USERDOMAIN -ne 'ESD1') { 
+if (($g -notin $config.SSIDs) -or $env:USERDOMAIN -ne $config.Domain) { 
     ExitWithMessage('Not working from home')
 }
 

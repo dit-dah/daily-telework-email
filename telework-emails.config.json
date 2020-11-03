@@ -1,5 +1,7 @@
 {
   "SSIDs": {{["SSIDS"]}},
   "StartTemplate": {{"outlook start template.oft"}},
-  "EndTemplate": {{"outlook end template.oft"}}
+  "EndTemplate": {{"outlook end template.oft"}},
+  "Domain": {{Domain Name}},
+  "LogPath": "telework-emails.log"
 }
